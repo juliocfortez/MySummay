@@ -214,7 +214,7 @@ namespace MyOwnSummary_API.Controllers
                 }
                 u = _mapper.Map<User>(user);
                 await _userRepository.Update(u);
-                _apiResponse.StatusCode = HttpStatusCode.NoContent;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
                 _apiResponse.IsSuccess = true;
                 _apiResponse.Result = user;
                 return Ok(_apiResponse);
