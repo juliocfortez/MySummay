@@ -43,7 +43,7 @@ namespace MyOwnSummary_API.Data
             modelBuilder.Entity<Note>(entity =>
             {
                 entity.ToTable("Note");
-                entity.Property(x => x.Description).IsRequired();
+                entity.Property(x => x.SourceText).IsRequired();
             });
         }
     }

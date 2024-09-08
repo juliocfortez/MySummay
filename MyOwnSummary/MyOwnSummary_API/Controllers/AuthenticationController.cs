@@ -18,7 +18,8 @@ namespace MyOwnSummary_API.Controllers
         private readonly IUserRepository _userRepository;
         private readonly APIResponse _apiResponse;
         public AuthenticationController(IConfiguration config, IUserRepository userRepository) {
-            secretKey = config.GetSection("Jwt").GetValue<string>("Key");
+            string? secretKey = config.GetSection("Jwt").GetValue<string>("Key");
+            this.secretKey = secretKey == null ? "" : secretKey;
             _userRepository = userRepository;
             _apiResponse = new();
         }
@@ -42,12 +43,13 @@ namespace MyOwnSummary_API.Controllers
                     }
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_apiResponse);
-                }
-                if (await _userRepository.Get(x => x.Password == user.Password && x.UserName == user.UserName) != null)
+                }var userRetrieved = await _userRepository.Get(x => x.Password == user.Password && x.UserName == user.UserName);
+                if (userRetrieved != null)
                 {
                     var keyBytes = Encoding.ASCII.GetBytes(secretKey);
                     var claims = new ClaimsIdentity();
-                    claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.UserName));
+                    claims.AddClaim(new Claim(ClaimTypes.NameIdentifier, userRetrieved.Id.ToString()));
+                    claims.AddClaim(new Claim(ClaimTypes.Name, userRetrieved.UserName));
                     var token = new SecurityTokenDescriptor
                     {
                         Subject = claims,

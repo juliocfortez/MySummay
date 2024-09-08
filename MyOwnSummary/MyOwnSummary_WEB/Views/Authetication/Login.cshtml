@@ -1,0 +1,60 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MyOwnSummary_WEB</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MyOwnSummary_WEB.styles.css" asp-append-version="true" />
+</head>
+<body class="d-flex align-items-center justify-content-center" style="min-height: 100vh">
+    <div class="container text-center">
+        <main role="main" class="pb-3">
+            <div class="mb-3 row">
+                <h1>My Own Summary</h1>
+            </div>
+            <form method="post" action="@Url.Action("Login", "Authetication")">
+                <div class="mb-3 row">
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                        <input type="text" class="form-control" id="username" name="Username" placeholder="User">
+                    </div>
+                    <div class="col-4">
+                    </div>
+
+                </div>
+                <div class="mb-3 row">
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                        <input type="password" class="form-control" id="password" name="Password" placeholder="Password">
+                    </div>
+                    <div class="col-4">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                    <div class="col-4">
+                    </div>
+                </div>
+            </form>
+            
+        </main>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>
+</html>
