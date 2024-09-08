@@ -1,0 +1,30 @@
+﻿@{
+    @model MyOwnSummary_WEB.Models.NoteDto
+}
+<form method="post" action="@Url.Action("Update", "Note")">
+    <div class="mb-3">
+        <label for="sourceText" class="form-label">Source Text</label>
+        <input type="text" class="form-control" id="sourceText" name="SourceText" value="@Model.SourceText">
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="Description" rows="3">@Model.Description</textarea>
+    </div>
+    <div class="mb-3">
+        <label for="translate" class="form-label">Translate</label>
+        <input type="text" class="form-control" id="translate" name="Translate" value="@Model.Translate">
+    </div>
+    <div class="mb-3">
+        <label for="pronunciation" class="form-label">Pronunciation</label>
+        <input type="text" class="form-control" id="pronunciation" name="Pronunciation" value="@Model.Pronunciation">
+    </div>
+    <input type="text" class="form-control" id="id" name="Id" value="@Model.Id" style="display:none">
+    <input type="text" class="form-control" id="category" name="Category" value="@Model.CategoryId" style="display:none">
+    <input type="text" class="form-control" id="language" name="Language" value="@Model.LanguageId" style="display:none">
+    <input type="text" class="form-control" id="user" name="User" value="@Model.UserId" style="display:none">
+    <input type="hidden" name="_method" value="put" />
+    <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+

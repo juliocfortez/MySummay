@@ -4,6 +4,8 @@ namespace MyOwnSummary_API.Repositories.IRepository
 {
     public interface IUserRepository : IRepository<User>
     {
-        Task Update(User user);   
+        Task Update(User user);
+
+        Task<List<Language>?> GetLanguagesByUser(int userId);
     }
 }

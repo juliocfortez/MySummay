@@ -199,6 +199,12 @@ namespace MyOwnSummary_API.Controllers
                     return BadRequest(_apiResponse);
                 }
                 var u = await _userRepository.Get(x => x.Id == id, false);
+                if (u == null)
+                {
+                    _apiResponse.Errors.Add($"El usuario con id {id} no existe");
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    return NotFound(_apiResponse);
+                }
                 var uRepetido = await _userRepository.Get(x => x.UserName == user.UserName && x.Id != id);
                 if (uRepetido != null)
                 {
@@ -206,15 +212,10 @@ namespace MyOwnSummary_API.Controllers
                     _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_apiResponse);
                 }
-                if (u == null)
-                {
-                    _apiResponse.Errors.Add($"El usuario con id {id} no existe");
-                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
-                    return NotFound(_apiResponse);
-                }
+                
                 u = _mapper.Map<User>(user);
                 await _userRepository.Update(u);
-                _apiResponse.StatusCode = HttpStatusCode.NoContent;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
                 _apiResponse.IsSuccess = true;
                 _apiResponse.Result = user;
                 return Ok(_apiResponse);

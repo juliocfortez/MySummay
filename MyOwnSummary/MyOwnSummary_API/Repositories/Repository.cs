@@ -22,13 +22,12 @@ namespace MyOwnSummary_API.Repositories
             await Save();
         }
 
-        public async Task<T> Get(Expression<Func<T, bool>> filter = null, bool tracked = true)
+        public async Task<T?> Get(Expression<Func<T, bool>> filter = null, bool tracked = true)
         {
             IQueryable<T> query = dbSet;
             if(!tracked) query = dbSet.AsNoTracking();
             if(filter != null) query = query.Where(filter);
             return await query.FirstOrDefaultAsync();
-
         }
 
         public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null)
