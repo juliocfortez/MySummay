@@ -6,7 +6,6 @@ namespace MyOwnSummary_API.Data
     public class ApplicationDbContext : DbContext
     {
         public DbSet<Language> Languages { get; set; }
-
         public DbSet<Category> Categories { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserLanguage> UserLanguages { get; set; }
@@ -43,7 +42,7 @@ namespace MyOwnSummary_API.Data
             modelBuilder.Entity<Note>(entity =>
             {
                 entity.ToTable("Note");
-                entity.Property(x => x.SourceText).IsRequired();
+                entity.HasIndex(x => x.SourceText).IsUnique();
             });
         }
     }

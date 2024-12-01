@@ -7,11 +7,11 @@ namespace MyOwnSummary_API.Models
         public int Id { get; set; }
         [MaxLength(50)]
         [Required]
-        public  string Name { get; set; }
+        public required string Name { get; set; }
 
-        public virtual ICollection<UserLanguage> Users { get; set; }
+        public virtual ICollection<UserLanguage> Users { get; set; } = new List<UserLanguage>();
 
-        public virtual ICollection<Note> Notes { get; set; }
+        public virtual ICollection<Note> Notes { get; set; } = new List<Note>();
     }
 
     

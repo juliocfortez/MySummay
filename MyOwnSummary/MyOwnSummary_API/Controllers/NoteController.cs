@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyOwnSummary_API.Models;
 using MyOwnSummary_API.Models.Dtos.CategoryDtos;
+using MyOwnSummary_API.Models.Dtos.DictionaryDtos;
 using MyOwnSummary_API.Models.Dtos.LanguageDtos;
 using MyOwnSummary_API.Models.Dtos.NoteDtos;
-using MyOwnSummary_API.Repositories;
 using MyOwnSummary_API.Repositories.IRepository;
 using System.Net;
 using System.Security.Claims;
@@ -26,7 +26,6 @@ namespace MyOwnSummary_API.Controllers
         public NoteController(INoteRepository noteRepository, IUserRepository userRepository, ICategoryRepository categoryRepository, ILogger<NoteController> logger, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
-            _noteRepository = noteRepository;
             _noteRepository = noteRepository;
             _userRepository = userRepository;
             _logger = logger;
@@ -294,13 +293,14 @@ namespace MyOwnSummary_API.Controllers
                 var userId = Convert.ToInt32(userIdClaim.Value);
                 var languagesByUser = await _userRepository.GetLanguagesByUser(userId);
                 var categories = await _categoryRepository.GetAll();
+                var dictionary = await _noteRepository.GetAll(x => x.UserId == userId);
                 var languagesDto = _mapper.Map<List<LanguageDto>>(languagesByUser);
                 var categoriesDto = _mapper.Map<List<CategoryDto>>(categories);
-                var notesDto = _mapper.Map<List<NoteDto>>(await _noteRepository.GetAll(x=>x.UserId == userId));
+                var dictionaryDto = _mapper.Map<List<NoteDto>>(dictionary);
                 NoteViews.UserId = userId;
                 NoteViews.Languages = languagesDto;
                 NoteViews.Categories = categoriesDto;
-                NoteViews.Notes = notesDto;
+                NoteViews.Notes = dictionaryDto;
                 _apiResponse.Result = NoteViews;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
                 _apiResponse.IsSuccess = true;

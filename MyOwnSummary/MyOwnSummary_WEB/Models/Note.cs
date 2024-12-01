@@ -17,9 +17,9 @@ namespace MyOwnSummary_WEB.Models
         
         public string? Description { get; set; }
         [Required]
-        public string SourceText { get; set; }
+        public string SourceText { get; set; } = string.Empty;
 
-        public string? Translate { get; set; }
+        public string Translate { get; set; } = string.Empty;
 
         public string? Pronunciation { get; set; }
     }
@@ -35,9 +35,9 @@ namespace MyOwnSummary_WEB.Models
         public int CategoryId { get; set; }
         [MaxLength(500)]
         public string? Description { get; set; }
-        public string SourceText { get; set; }
+        public string SourceText { get; set; } = string.Empty;  
 
-        public string? Pronunciation { get; set; }
+        public string Pronunciation { get; set; } = string.Empty;
         public string? Translate { get; set; }
     }
 
@@ -51,9 +51,9 @@ namespace MyOwnSummary_WEB.Models
         [MaxLength(500)]
         public string? Description { get; set; }
         [Required]
-        public string SourceText { get; set; }
+        public string SourceText { get; set; } = string.Empty;
 
-        public string? Translate { get; set; }
+        public string Translate { get; set; } = string.Empty;
 
         public string? Pronunciation { get; set; }
     }

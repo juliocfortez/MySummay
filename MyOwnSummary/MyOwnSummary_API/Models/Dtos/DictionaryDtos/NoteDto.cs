@@ -2,25 +2,22 @@
 using MyOwnSummary_API.Models.Dtos.LanguageDtos;
 using System.ComponentModel.DataAnnotations;
 
-namespace MyOwnSummary_API.Models.Dtos.NoteDtos
+namespace MyOwnSummary_API.Models.Dtos.DictionaryDtos
 {
     public class NoteDto
     {
         public int Id { get; set; }
-        [Required]
-        public int UserId { get; set; }
-        [Required]
-        public int LanguageId { get; set; }
-        [Required]
-        public int CategoryId { get; set; }
+        public required int UserId { get; set; }
+        public required int LanguageId { get; set; }
+        public required int CategoryId { get; set; }
+
         [MaxLength(500)]
         public string? Description { get; set; }
-        [Required]
-        public string SourceText { get; set; } = "";
+        public required string SourceText { get; set; }
+
+        public required string Translate { get; set; }
 
         public string? Pronunciation { get; set; }
-
-        public string? Translate { get; set; }
     }
 
     public class NoteViewDto
