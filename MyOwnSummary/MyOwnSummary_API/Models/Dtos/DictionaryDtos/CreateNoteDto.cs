@@ -6,17 +6,15 @@ namespace MyOwnSummary_API.Models.Dtos.NoteDtos
 {
     public class CreateNoteDto
     {
-        public int UserId { get; set; }
-        [Required]
-        public int LanguageId { get; set; }
-        [Required]
-        public int CategoryId { get; set; }
+        public required int UserId { get; set; }
+        public required int LanguageId { get; set; }
+        public required int CategoryId { get; set; }
+
         [MaxLength(500)]
         public string? Description { get; set; }
-        [Required]
-        public string SourceText { get; set; }
+        public required string SourceText { get; set; }
 
-        public string? Translate { get; set; }
+        public required string Translate { get; set; }
 
         public string? Pronunciation { get; set; }
     }
@@ -26,8 +24,8 @@ namespace MyOwnSummary_API.Models.Dtos.NoteDtos
         [Required]
         public int UserId { get; set; }
         [Required]
-        public List<LanguageDto> Languages { get; set; }
+        public List<LanguageDto> Languages { get; set; } = new();
         [Required]
-        public List<CategoryDto> Categories { get; set; }
+        public List<CategoryDto> Categories { get; set; } = new();
     }
 }
