@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Linq.Expressions;
 
 namespace MyOwnSummary_API.Repositories.IRepository
 {
@@ -7,10 +8,10 @@ namespace MyOwnSummary_API.Repositories.IRepository
         Task Create(T entity);
         Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null);
 
-        Task<T?> Get(Expression<Func<T, bool>> filter = null, bool tracked = true);
+        Task<T?> Get(Expression<Func<T, bool>>? filter = null, bool tracked = true);
 
         Task Remove(T entity);
 
-        Task Save(); 
+        Task Save();
     }
 }

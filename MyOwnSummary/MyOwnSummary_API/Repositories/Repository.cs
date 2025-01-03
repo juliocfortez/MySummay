@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MyOwnSummary_API.Data;
 using MyOwnSummary_API.Repositories.IRepository;
 using System.Diagnostics;
@@ -22,7 +23,7 @@ namespace MyOwnSummary_API.Repositories
             await Save();
         }
 
-        public async Task<T?> Get(Expression<Func<T, bool>> filter = null, bool tracked = true)
+        public async Task<T?> Get(Expression<Func<T, bool>>? filter = null, bool tracked = true)
         {
             IQueryable<T> query = dbSet;
             if(!tracked) query = dbSet.AsNoTracking();

@@ -294,6 +294,7 @@ namespace MyOwnSummary_API.Controllers
                 var languagesByUser = await _userRepository.GetLanguagesByUser(userId);
                 var categories = await _categoryRepository.GetAll();
                 var dictionary = await _noteRepository.GetAll(x => x.UserId == userId);
+                dictionary = dictionary.OrderByDescending(x => x.Id);
                 var languagesDto = _mapper.Map<List<LanguageDto>>(languagesByUser);
                 var categoriesDto = _mapper.Map<List<CategoryDto>>(categories);
                 var dictionaryDto = _mapper.Map<List<NoteDto>>(dictionary);

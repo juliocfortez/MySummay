@@ -43,6 +43,7 @@ namespace MyOwnSummary_API.Data
             {
                 entity.ToTable("Note");
                 entity.HasIndex(x => x.SourceText).IsUnique();
+                entity.Property(x=>x.Repetition).HasDefaultValue(0).IsRequired(true);
             });
         }
     }
