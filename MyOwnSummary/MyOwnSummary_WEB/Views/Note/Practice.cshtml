@@ -1,0 +1,182 @@
+﻿@{
+    @model List<MyOwnSummary_WEB.Models.NoteDto>
+}
+<h1 style="text-align:center">Let's Practice</h1>
+<form id="practiceForm" method="post" action="@Url.Action("UpdateNotePractice", "Note", new { noteId = Model.First()?.Id })">
+    <div class="mb-3">
+        <label for="sourceText" class="form-label">Source Text</label>
+        <input type="text" class="form-control" id="sourceText" name="SourceText" readonly>
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="Description" rows="3" readonly></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="translate" class="form-label" id="lbTranslate">Translate</label>
+        <input type="text" class="form-control" id="translate" name="Translate">
+    </div>
+    <div class="mb-3">
+        <label for="pronunciation" class="form-label" id="lbPronunciation">Pronunciation</label>
+        <input type="text" class="form-control" id="pronunciation" name="Pronunciation" readonly>
+    </div>
+    <input type="hidden" id="id" name="Id">
+    <input type="hidden" name="_method" value="put">
+    <div class="row">
+        <div class="mb-3 col-12">
+            <button type="button" class="btn btn-primary me-2" style="float:left" onclick="handleSubmit()">Submit</button>
+            <button type="button" class="btn btn-primary" style="float:left" onclick="showAnswer()">Show Answer</button>
+            <input type="checkbox" id="swapToggle" name="swapToggle" style="float:left; margin-left: 10px; margin-top: 8px;" onchange="handleSwapToggleChange()">
+            <label for="swapToggle" style="float:left; margin-left: 5px; margin-top: 5px;">Swap</label>
+            <button type="button" class="btn btn-primary" style="float:right" onclick="loadNextWord()">Next</button>
+            <button type="button" class="btn btn-primary me-2" style="float:right" onclick="loadPreviusWord()">Previus</button> 
+        </div>
+    </div>
+</form>
+
+<script>
+    // Initialize a JavaScript variable with the Model data
+    let notes = @Html.Raw(Json.Serialize(Model)); // Serialize the Model to JSON
+    let currentIndex = 0; // Track the current word index
+    let retryCount = 0; // Track the number of user retries
+    const maxRetries = 3;
+
+    // Function to load the current word into the form
+    function loadCurrentWord() {
+        const currentNote = notes[currentIndex];
+        const swapToggleCheckbox = document.getElementById("swapToggle");
+        const pronunciationInput = document.getElementById("pronunciation");
+
+        if (swapToggleCheckbox.checked) {
+            document.getElementById("sourceText").value = currentNote.translate;
+            document.getElementById("translate").value = "";
+            pronunciationInput.value = "";
+            pronunciationInput.readOnly = false;
+        } else {
+            document.getElementById("sourceText").value = currentNote.sourceText;
+            document.getElementById("translate").value = "";
+            pronunciationInput.value = currentNote.pronunciation;
+            pronunciationInput.readOnly = true;
+        }
+        document.getElementById("id").value = currentNote.id;
+        document.getElementById("description").value = currentNote.description;
+    }
+
+    // Load the first word when the page loads
+    document.addEventListener("DOMContentLoaded", loadCurrentWord);
+
+    // Function to handle form submission
+    async function handleSubmit() {
+        const translate = document.getElementById("translate").value.trim();
+        const pronunciation = document.getElementById("pronunciation").value.trim();
+        const description = document.getElementById("description").value.trim();
+        const currentNote = notes[currentIndex];
+        const swapToggleCheckbox = document.getElementById("swapToggle");
+        const lbPronunciation = document.getElementById("lbPronunciation");
+        const lbTranslate = document.getElementById("lbTranslate");
+
+        if (swapToggleCheckbox.checked){
+            if (!translate) {
+                alert("Please fill the " + lbTranslate.textContent + " field.");
+                return;
+            }
+
+            if (translate !== currentNote.sourceText && pronunciation !== currentNote.pronunciation) {
+                retryCount++;
+                alert("Your response is not correct. Please try again.");
+
+                if (retryCount >= maxRetries) {
+                    if (confirm("Do you want to see the correct answer?")) {
+                        document.getElementById("description").value = currentNote.description;
+                        document.getElementById("translate").value = currentNote.sourceText;
+                        document.getElementById("pronunciation").value = currentNote.pronunciation;
+                    }
+                }
+                return;
+            }
+        }
+        else{
+            if (!translate) {
+                alert("Please fill the " + lbTranslate.textContent + " field.");
+                return;
+            }
+
+            if (translate !== currentNote.translate) {
+                retryCount++;
+                alert("Your response is not correct. Please try again.");
+
+                if (retryCount >= maxRetries) {
+                    if (confirm("Do you want to see the correct answer?")) {
+                        document.getElementById("description").value = currentNote.description;
+                        document.getElementById("translate").value = currentNote.translate;
+                        document.getElementById("pronunciation").value = currentNote.pronunciation;
+                    }
+                }
+                return;
+            }
+        }
+        
+
+        const formData = new FormData(document.getElementById("practiceForm"));
+        try {
+            const url = `/Note/UpdateNotePractice?noteId=${currentNote.id}`;
+
+            const response = await fetch(url, {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                alert(`Error: ${result.message}`);
+                return;
+            }
+
+            // Update the notes array with the new data returned from the API
+            notes = result;
+
+            // Move to the next word
+            currentIndex = 0;
+            retryCount = 0; // Reset retry count for the new word
+
+            // Load the next word into the form
+            loadCurrentWord();
+
+            alert("Form submitted successfully and data refreshed!");
+        } catch (error) {
+            alert(`An error occurred: ${error.message}`);
+        }
+    }
+
+    // Function to load the next word
+    function loadNextWord() {
+        currentIndex = (currentIndex + 1) % notes.length;
+        retryCount = 0; // Reset retry count for the new word
+        loadCurrentWord();
+    }
+
+    function loadPreviusWord() {
+        currentIndex = (currentIndex - 1 + notes.length) % notes.length;
+        retryCount = 0; // Reset retry count for the new word
+        loadCurrentWord();
+    }
+
+    function showAnswer() {
+        const swapToggleCheckbox = document.getElementById("swapToggle");
+        const currentNote = notes[currentIndex];
+        if (swapToggleCheckbox.checked){
+            document.getElementById("pronunciation").value = currentNote.pronunciation;
+            document.getElementById("translate").value = currentNote.sourceText;
+        }
+        else{
+            document.getElementById("translate").value = currentNote.translate;
+        }
+        
+    }
+
+    function handleSwapToggleChange() {
+        loadCurrentWord();
+    }
+
+
+
+</script>

@@ -18,6 +18,8 @@ namespace MyOwnSummary_API.Models.Dtos.DictionaryDtos
         public required string Translate { get; set; }
 
         public string? Pronunciation { get; set; }
+
+        public int Repetition { get; set; }
     }
 
     public class NoteViewDto

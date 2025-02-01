@@ -5,5 +5,7 @@ namespace MyOwnSummary_API.Repositories.IRepository
     {
         Task Update(Note note);
 
+        Task UpdatePractice(Note note);
+
     }
 }

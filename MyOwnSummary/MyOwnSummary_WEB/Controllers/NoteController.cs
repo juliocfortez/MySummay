@@ -12,7 +12,7 @@ namespace MyOwnSummary_WEB.Controllers
         public User? AuthenticatedUser { get; private set; }
         public async Task<IActionResult> Update(int noteId)
         {
-            if(Request.Method != "GET") 
+            if (Request.Method != "GET")
             {
                 if (Request.Form["_method"] == "put")
                 {
@@ -120,61 +120,61 @@ namespace MyOwnSummary_WEB.Controllers
                     }
                 }
             }
-            
+
         }
 
         public async Task<IActionResult> Create()
         {
             if (Request.Method == "POST")
             {
-                    CreateNoteDto note = new CreateNoteDto
-                    {
-                        CategoryId = Convert.ToInt32(Request.Form["Category"]),
-                        LanguageId = Convert.ToInt32(Request.Form["Language"]),
-                        Description = Request.Form["Description"],
-                        SourceText = Request.Form["SourceText"],
-                        Translate = Request.Form["Translate"],
-                        Pronunciation = Request.Form["Pronunciation"],
-                        UserId = Convert.ToInt32(Request.Form["User"])
-                    };
-                    string urlApi = "https://localhost:7066/api/Note";
-                    var authenticatedUserBytes = HttpContext.Session.Get("AuthenticatedUser");
-                    AuthenticatedUser = authenticatedUserBytes != null
-                        ? JsonConvert.DeserializeObject<User>(Encoding.UTF8.GetString(authenticatedUserBytes))
-                        : null;
+                CreateNoteDto note = new CreateNoteDto
+                {
+                    CategoryId = Convert.ToInt32(Request.Form["Category"]),
+                    LanguageId = Convert.ToInt32(Request.Form["Language"]),
+                    Description = Request.Form["Description"],
+                    SourceText = Request.Form["SourceText"],
+                    Translate = Request.Form["Translate"],
+                    Pronunciation = Request.Form["Pronunciation"],
+                    UserId = Convert.ToInt32(Request.Form["User"])
+                };
+                string urlApi = "https://localhost:7066/api/Note";
+                var authenticatedUserBytes = HttpContext.Session.Get("AuthenticatedUser");
+                AuthenticatedUser = authenticatedUserBytes != null
+                    ? JsonConvert.DeserializeObject<User>(Encoding.UTF8.GetString(authenticatedUserBytes))
+                    : null;
 
-                    if (AuthenticatedUser == null)
+                if (AuthenticatedUser == null)
+                {
+                    return RedirectToAction("Login", "Authetication");
+                }
+                string? token = AuthenticatedUser.Token;
+                ApiResponse? apiResponse = new();
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    try
                     {
-                        return RedirectToAction("Login", "Authetication");
-                    }
-                    string? token = AuthenticatedUser.Token;
-                    ApiResponse? apiResponse = new();
-                    using (HttpClient httpClient = new HttpClient())
-                    {
-                        try
+                        string jsonNote = JsonConvert.SerializeObject(note);
+                        StringContent content = new StringContent(jsonNote, Encoding.UTF8, "application/json");
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        HttpResponseMessage response = await httpClient.PostAsync(urlApi, content);
+                        if (response.IsSuccessStatusCode)
                         {
-                            string jsonNote = JsonConvert.SerializeObject(note);
-                            StringContent content = new StringContent(jsonNote, Encoding.UTF8, "application/json");
-                            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                            HttpResponseMessage response = await httpClient.PostAsync(urlApi, content);
-                            if (response.IsSuccessStatusCode)
-                            {
-                                return RedirectToAction("Notes", "Home");
-                            }
-                            else if (response.StatusCode == HttpStatusCode.Unauthorized)
-                            {
-                                return RedirectToAction("Login", "Authetication");
-                            }
-                            else
-                            {
-                                return View("Error");
-                            }
+                            return RedirectToAction("Notes", "Home");
                         }
-                        catch 
+                        else if (response.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            return RedirectToAction("Login", "Authetication");
+                        }
+                        else
                         {
                             return View("Error");
                         }
                     }
+                    catch
+                    {
+                        return View("Error");
+                    }
+                }
             }
             else
             {
@@ -224,13 +224,13 @@ namespace MyOwnSummary_WEB.Controllers
                         return View("Error");
                     }
                 }
-                
+
             }
         }
 
         public async Task<HttpStatusCode> Delete(int noteId)
         {
-            string urlApi = "https://localhost:7066/api/Note/"+noteId;
+            string urlApi = "https://localhost:7066/api/Note/" + noteId;
             var authenticatedUserBytes = HttpContext.Session.Get("AuthenticatedUser");
             AuthenticatedUser = authenticatedUserBytes != null
                 ? JsonConvert.DeserializeObject<User>(Encoding.UTF8.GetString(authenticatedUserBytes))
@@ -265,6 +265,111 @@ namespace MyOwnSummary_WEB.Controllers
                 {
                     return HttpStatusCode.InternalServerError;
                 }
+            }
+        }
+
+        public async Task<IActionResult> Practice()
+        {
+            string urlApi = "https://localhost:7066/api/Note/NotesForPractice";
+            var authenticatedUserBytes = HttpContext.Session.Get("AuthenticatedUser");
+            AuthenticatedUser = authenticatedUserBytes != null
+                ? JsonConvert.DeserializeObject<User>(Encoding.UTF8.GetString(authenticatedUserBytes))
+                : null;
+
+            if (AuthenticatedUser == null)
+            {
+                return RedirectToAction("Login", "Authetication");
+            }
+            string? token = AuthenticatedUser.Token;
+
+            ApiResponse? apiResponse = new();
+            using (HttpClient httpClient = new HttpClient())
+            {
+                try
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    HttpResponseMessage response = await httpClient.GetAsync(urlApi);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string jsonResponse = await response.Content.ReadAsStringAsync();
+
+                        // Deserialize the JSON content into ApiResponse
+                        apiResponse = JsonConvert.DeserializeObject<ApiResponse>(jsonResponse);
+
+                        // Ensure apiResponse.Result is converted to List<NoteDto>
+                        List<NoteDto>? notes = JsonConvert.DeserializeObject<List<NoteDto>>(JsonConvert.SerializeObject(apiResponse?.Result));
+                        return View(notes);
+                    }
+                    else if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        return RedirectToAction("Login", "Authetication");
+                    }
+                    else
+                    {
+                        return View("Error");
+                    }
+                }
+                catch
+                {
+                    return View("Error");
+                }
+            }
+        }
+
+        public async Task<IActionResult> UpdateNotePractice(int noteId)
+        {
+            if (Request.Form["_method"] == "put")
+            {
+                string urlApi = "https://localhost:7066/api/Note/practice/" + noteId;
+                var authenticatedUserBytes = HttpContext.Session.Get("AuthenticatedUser");
+                AuthenticatedUser = authenticatedUserBytes != null
+                    ? JsonConvert.DeserializeObject<User>(Encoding.UTF8.GetString(authenticatedUserBytes))
+                    : null;
+
+                if (AuthenticatedUser == null)
+                {
+                    return RedirectToAction("Login", "Authetication");
+                }
+                string? token = AuthenticatedUser.Token;
+                ApiResponse? apiResponse = new();
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    try
+                    {
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        HttpResponseMessage response = await httpClient.PutAsync(urlApi, null);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string jsonResponse = await response.Content.ReadAsStringAsync();
+                            apiResponse = JsonConvert.DeserializeObject<ApiResponse>(jsonResponse);
+                            if (apiResponse != null && apiResponse.StatusCode == HttpStatusCode.OK && apiResponse.Result != null)
+                            {
+                                List<NoteDto> notes = JsonConvert.DeserializeObject<List<NoteDto>>(JsonConvert.SerializeObject(apiResponse.Result));
+                                return Ok(notes);
+                            }
+                            else
+                            {
+                                return BadRequest(apiResponse?.Errors);
+                            }
+                        }
+                        else if (response.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            return RedirectToAction("Login", "Authetication");
+                        }
+                        else
+                        {
+                            return BadRequest(apiResponse?.Errors);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+                    }
+                }
+            }
+            else
+            {
+                return RedirectToAction("Notes", "Home");
             }
         }
     }

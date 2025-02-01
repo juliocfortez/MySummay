@@ -35,10 +35,14 @@ namespace MyOwnSummary_WEB.Models
         public int CategoryId { get; set; }
         [MaxLength(500)]
         public string? Description { get; set; }
-        public string SourceText { get; set; } = string.Empty;  
-
+        [MaxLength(100)]
+        public string SourceText { get; set; } = string.Empty;
+        [MaxLength(100)]
         public string Pronunciation { get; set; } = string.Empty;
+        [MaxLength(100)]
         public string? Translate { get; set; }
+
+        public int Repetition { get; set; }
     }
 
     public class CreateNoteDto

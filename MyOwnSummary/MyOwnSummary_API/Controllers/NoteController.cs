@@ -179,8 +179,6 @@ namespace MyOwnSummary_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(APIResponse))]
         public async Task<IActionResult> Update([FromBody] NoteDto note, int id)
         {
-            //ESTE METODO NO ES IGUAL A LOS DEMAS PORQUE PUEDO CAMBIAR LA CATEGORÍA DE LA NOTA
-            //throw new NotImplementedException();
             try
             {
                 if (id != note.Id)
@@ -222,8 +220,9 @@ namespace MyOwnSummary_API.Controllers
             {
                 _apiResponse.Errors.Add(ex.Message);
                 _apiResponse.IsSuccess = false;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                return BadRequest(_apiResponse);
             }
-            return BadRequest(_apiResponse);
         }
 
         [HttpGet("User",Name = "GetNotesByUserId")]
@@ -314,5 +313,94 @@ namespace MyOwnSummary_API.Controllers
                 return Unauthorized(_apiResponse);
             }
         }
+
+        [HttpGet("NotesForPractice", Name = "GetNotesForPractice")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(APIResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(APIResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(APIResponse))]
+        public async Task<ActionResult<APIResponse>> GetNotesForPractice()
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null)
+            {
+                List<NoteDto> notesDto = new();
+                var userId = Convert.ToInt32(userIdClaim.Value);
+                var notes = await _noteRepository.GetAll(x => x.UserId == userId);
+                notes = notes.OrderBy(x => x.Repetition).ThenByDescending(x=>x.Id);
+                notesDto = _mapper.Map<List<NoteDto>>(notes);
+                _apiResponse.Result = notesDto;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                _apiResponse.IsSuccess = true;
+                return Ok(_apiResponse);
+            }
+            else
+            {
+                _apiResponse.StatusCode = HttpStatusCode.Unauthorized;
+                _apiResponse.IsSuccess = false;
+                return Unauthorized(_apiResponse);
+            }
+        }
+
+        [HttpPut("practice/{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(APIResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(APIResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(APIResponse))]
+        public async Task<IActionResult> UpdateNotePractice(int id)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    foreach (var item in ModelState.Values)
+                    {
+                        foreach (var error in item.Errors)
+                        {
+                            _apiResponse.Errors.Add(error.ErrorMessage);
+                        }
+                    }
+                    _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    _apiResponse.IsSuccess = false;
+                    return BadRequest(_apiResponse);
+                }
+
+                var note = await _noteRepository.Get(x => x.Id == id, false);
+                if (note == null)
+                {
+                    _apiResponse.Errors.Add($"The note with ID {id} does not exist.");
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.IsSuccess = false;
+                    return NotFound(_apiResponse);
+                }
+
+                await _noteRepository.UpdatePractice(note);
+
+                // Invoke the GetNotesForPractice logic directly
+                var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    _apiResponse.StatusCode = HttpStatusCode.Unauthorized;
+                    _apiResponse.IsSuccess = false;
+                    return Unauthorized(_apiResponse);
+                }
+
+                var userId = Convert.ToInt32(userIdClaim.Value);
+                var notes = await _noteRepository.GetAll(x => x.UserId == userId);
+                notes = notes.OrderBy(x => x.Repetition).ThenByDescending(x => x.Id);
+                var notesDto = _mapper.Map<List<NoteDto>>(notes);
+
+                _apiResponse.Result = notesDto;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                _apiResponse.IsSuccess = true;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.Errors.Add(ex.Message);
+                _apiResponse.IsSuccess = false;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                return BadRequest(_apiResponse);
+            }
+        }
+
     }
 }
